@@ -3,11 +3,13 @@ package com.debanshu777.expense_tracker.service
 import com.debanshu777.expense_tracker.model.Expense
 import com.debanshu777.expense_tracker.repository.ExpenseRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
-import java.util.function.Supplier
 
 @Service
+@CacheConfig(cacheNames = ["expense"])
 class ExpenseService( @Autowired val expenseRepository:ExpenseRepository) {
 
     fun addExpense(expense:Expense):Expense=expenseRepository.insert(expense)
@@ -22,7 +24,11 @@ class ExpenseService( @Autowired val expenseRepository:ExpenseRepository) {
         expenseRepository.save(savedExpense)
     }
 
-    fun getAllExpense() : List<Expense> = expenseRepository.findAll()
+    @Cacheable
+    fun getAllExpense() : List<Expense> {
+        Thread.sleep(5000)
+        return expenseRepository.findAll()
+    }
 
     fun getExpenseByName(name:String):Expense=expenseRepository.findByName(name).orElseThrow{ throw RuntimeException("Cannot find Expense by Name") }
 
